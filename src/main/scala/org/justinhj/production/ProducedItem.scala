@@ -11,11 +11,13 @@ case class ProducedItem(snapshotAmount: Long, snapshotTime: Long, amountPerHour:
 object ProducedItem {
     def empty = ProducedItem(0, System.currentTimeMillis(), 0)
 
-    implicit def eqProducedItem(implicit clock : Clock) = new Eq[ProducedItem] {
-        def eqv(x: ProducedItem, y: ProducedItem): Boolean = {
-            x.currentAmount == y.currentAmount
-        }
-    }
+    implicit val eqProducedItem : Eq[ProducedItem] = Eq.fromUniversalEquals
+
+    // implicit def eqProducedItem(implicit clock : Clock) = new Eq[ProducedItem] {
+    //     def eqv(x: ProducedItem, y: ProducedItem): Boolean = {
+    //         x.currentAmount == y.currentAmount
+    //     }
+    // }
 
     implicit val showProducedItem = new Show[ProducedItem] {
         def show(p: ProducedItem): String = 
