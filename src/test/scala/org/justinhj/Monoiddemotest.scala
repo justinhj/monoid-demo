@@ -2,11 +2,21 @@ package org.justinhj.production
 
 import org.scalatest.FlatSpec
 
-import cats.implicits._
+import cats.syntax.monoid._
+import cats.instances.map._
+import org.scalacheck.ScalacheckShapeless._
+import org.justinhj.production.ProducedItem._
+import cats.tests.CatsSuite
+import cats.kernel.laws.discipline.MonoidTests
+
+class ProducedItemTests extends CatsSuite {
+  implicit val clock = FixedClock(System.currentTimeMillis + Clock.oneHourMillis)
+  checkAll("ProducedItem.MonoidLaws", MonoidTests[ProducedItem].monoid)
+}
 
 class ProducedItemTest extends FlatSpec {
 
-  "ProducedItem" should "append correctly" in {
+  "Map of ProducedItem" should "append correctly" in {
 
     // Sample with test clock
     implicit val clock = FixedClock(System.currentTimeMillis + Clock.oneHourMillis)
@@ -33,6 +43,6 @@ class ProducedItemTest extends FlatSpec {
       2 -> ProducedItem(10,now,5.0), 
       3 -> ProducedItem(2,now,0.0))
 
-    assert (expected === addInventories)
+    assert(expected === addInventories)
   }
 }
