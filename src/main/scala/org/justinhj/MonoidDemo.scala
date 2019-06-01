@@ -3,6 +3,7 @@ package org.justinhj
 import cats._
 import cats.data._
 import cats.implicits._
+import alleycats.std.map._
 
 import production._
 

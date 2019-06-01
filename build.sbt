@@ -59,7 +59,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.scala-logging" %% "scala-logging" % "3.9.0",
   // Cats
   "org.typelevel" %% "cats-core" % CatsVersion,
-  //"org.typelevel" %% "cats-laws" % CatsVersion,
+  "org.typelevel" %% "alleycats-core" % CatsVersion,
   "org.typelevel" %% "cats-testkit" % CatsVersion,
   "org.typelevel" %% "cats-effect" % CatsEffectVersion,
   // fs2
