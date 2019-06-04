@@ -12,6 +12,7 @@ lazy val monoiddemo = (project in file(".")).
 /* scala versions and options */
 scalaVersion := "2.12.8"
 
+addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.0")
 addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.6")
 
 // These options will be used for *all* versions.
@@ -26,7 +27,7 @@ scalacOptions ++= Seq(
     //  ,"-Xfatal-warnings"
     , "-language:_"
     //,"-optimise"
-    //,"-Xlog-implicit-conversions"
+    ,"-Xlog-implicit-conversions"
 )
 
 javacOptions ++= Seq("-Xlint:unchecked", "-Xlint:deprecation", "-source", "1.7", "-target", "1.7")
@@ -60,6 +61,7 @@ libraryDependencies ++= Seq(
   // Cats
   "org.typelevel" %% "cats-core" % CatsVersion,
   "org.typelevel" %% "alleycats-core" % CatsVersion,
+  //"org.typelevel" %% "cats-laws" % CatsVersion,
   "org.typelevel" %% "cats-testkit" % CatsVersion,
   "org.typelevel" %% "cats-effect" % CatsEffectVersion,
   // fs2
