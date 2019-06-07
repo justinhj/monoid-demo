@@ -26,7 +26,7 @@ scalacOptions ++= Seq(
     //  ,"-Xfatal-warnings"
     , "-language:_"
     //,"-optimise"
-    ,"-Xlog-implicit-conversions"
+    //,"-Xlog-implicit-conversions"
 )
 
 javacOptions ++= Seq("-Xlint:unchecked", "-Xlint:deprecation", "-source", "1.7", "-target", "1.7")

@@ -1,8 +1,11 @@
-package org.justinhj.production
+package org.justinhj.production.productioncats
 
-import cats._
+import cats.{Monoid, Show, Eq}
+
+import org.justinhj.production.Clock
 
 // Represents an item that may be produced over time
+// Note that this duplicates the implementation in production.scalaz for pedagogical reasons
 case class ProducedItem(snapshotAmount: Long, snapshotTime: Long, amountPerHour: Double) {
     def currentAmount(implicit clock: Clock) = 
         snapshotAmount + (((clock.currentTimeMillis - snapshotTime) / Clock.oneHourMillis) * amountPerHour).toLong
