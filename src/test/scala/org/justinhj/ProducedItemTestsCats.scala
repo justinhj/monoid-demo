@@ -1,6 +1,6 @@
 package org.justinhj.production
 
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 
 import cats.syntax.monoid._
 import cats.instances.map._
@@ -16,7 +16,7 @@ class ProducedItemLawTestsCats extends CatsSuite {
   checkAll("ProducedItem.MonoidLaws", MonoidTests[ProducedItem].monoid)
 }
 
-class ProducedItemTestCats extends FlatSpec {
+class ProducedItemTestCats extends AnyFlatSpec {
 
   "Map of ProducedItem" should "append correctly" in {
 
