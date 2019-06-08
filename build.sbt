@@ -27,7 +27,7 @@ scalacOptions ++= Seq(
     //  ,"-Xfatal-warnings"
     , "-language:_"
     //,"-optimise"
-    ,"-Xlog-implicit-conversions"
+    //,"-Xlog-implicit-conversions"
 )
 
 javacOptions ++= Seq("-Xlint:unchecked", "-Xlint:deprecation", "-source", "1.7", "-target", "1.7")
@@ -72,6 +72,8 @@ libraryDependencies ++= Seq(
   "com.chuusai" %% "shapeless" % ShapelessVersion,
   // scalaz
   "org.scalaz" %% "scalaz-core" % ScalaZVersion,
+  "org.scalaz" %% "scalaz-scalacheck-binding" % ScalaZVersion,
+  // ZIO
   "org.scalaz" %% "scalaz-zio" % ZIOVersion,
   // type classes
   "com.github.mpilquist" %% "simulacrum" % "0.12.0",

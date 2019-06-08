@@ -1,10 +1,13 @@
 package org.justinhj
 
 import cats._
-import cats.data._
+//import cats.data._
 import cats.implicits._
-import cats.kernel.instances.all
+//import cats.kernel.instances.all
+import alleycats.std.map._
+
 import production._
+import production.productioncats._
 
 object MonoidDemo {
 
@@ -27,8 +30,16 @@ object MonoidDemo {
       3 -> ProducedItem(1, 0, 0))
 
     val addInventories = inventory1 |+| inventory2 |+| inventory3
+    println(show"Inventory added with |+| $addInventories")
 
-    println(show"Inventory $addInventories")
+    val mapOfInts = Monoid[Map[Int, Int]].combine(Map (1 -> 50), Map(1 -> -100, 2 -> -100)) 
+    println(show"Map of ints $mapOfInts")
+
+    val listOfInventories = Foldable[List].fold(List(inventory1, inventory2, inventory3))
+    println(show"List of inventories $listOfInventories")
+
+    val foldMapofInts = Foldable[({type MapA[A] = Map[Int, A]})#MapA].fold(Map(1 -> 200, 3 -> 5, 5 -> 100))  
+    println(show"Fold map of ints $foldMapofInts")
   }
 
 }
