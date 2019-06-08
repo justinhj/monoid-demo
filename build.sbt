@@ -71,6 +71,8 @@ libraryDependencies ++= Seq(
   "com.chuusai" %% "shapeless" % ShapelessVersion,
   // scalaz
   "org.scalaz" %% "scalaz-core" % ScalaZVersion,
+  "org.scalaz" %% "scalaz-scalacheck-binding" % ScalaZVersion,
+  // ZIO
   "org.scalaz" %% "scalaz-zio" % ZIOVersion,
   // type classes
   "com.github.mpilquist" %% "simulacrum" % "0.12.0",

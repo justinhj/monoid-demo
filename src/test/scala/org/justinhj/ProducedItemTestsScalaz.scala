@@ -4,7 +4,7 @@ import org.scalatest.FlatSpec
 
 import scalaz.std.map._
 import scalaz.syntax.semigroup._
-
+import org.scalacheck.ScalacheckShapeless._
 import productionscalaz.ProducedItem
 import productionscalaz.ProducedItem._
 

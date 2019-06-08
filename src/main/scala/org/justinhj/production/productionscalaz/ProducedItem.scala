@@ -14,8 +14,18 @@ case class ProducedItem(snapshotAmount: Long, snapshotTime: Long, amountPerHour:
 object ProducedItem {
     def empty = ProducedItem(0, System.currentTimeMillis(), 0)
 
-//    implicit val eqProducedItem : Eq[ProducedItem] = Eq.fromUniversalEquals
+    // Naive implementation of equals that causes our Monoid to violate the left and right identity laws
+    // implicit val ProducedItemEquals = new Equal[ProducedItem] {
+    //     // we are using Scalaz === internally
+    //     def equal(a1: ProducedItem, a2: ProducedItem): Boolean = {
+    //         a1.amountPerHour == a2.amountPerHour &&
+    //         a1.snapshotAmount == a2.snapshotAmount &&
+    //         a1.snapshotTime == a2.snapshotTime
+    //     }
+    //   }
 
+    // Implementation of Equals that reflects better our business requirements 
+    // and allows us to pass the Monoid laws
     implicit def eqProducedItem(implicit clock : Clock) = new Equal[ProducedItem] {
         def equal(x: ProducedItem, y: ProducedItem): Boolean = {
             x.currentAmount == y.currentAmount
