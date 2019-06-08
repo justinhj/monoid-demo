@@ -1,19 +1,23 @@
 package org.justinhj.production
 
-import org.scalatest.FlatSpec
-
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.PropSpec
 import scalaz.std.map._
 import scalaz.syntax.semigroup._
 import org.scalacheck.ScalacheckShapeless._
 import productionscalaz.ProducedItem
 import productionscalaz.ProducedItem._
+import scalaz.scalacheck.ScalazProperties._
+import org.scalacheck.Test
 
-// class ProducedItemLawTestsScalaz extends ??? {
-//   implicit val clock = FixedClock(System.currentTimeMillis + Clock.oneHourMillis)
-//   checkAll("ProducedItem.MonoidLaws", MonoidTests[ProducedItem].monoid)
-// }
+class MonoidLawsScalaz extends PropSpec {
+  implicit val clock = FixedClock(System.currentTimeMillis + Clock.oneHourMillis)
+  val oneWorker = Test.Parameters.default.withMinSuccessfulTests(5000)
 
-class ProducedItemTestScalaz extends FlatSpec {
+  monoid.laws[ProducedItem].check(oneWorker) 
+}
+
+class ProducedItemTestScalaz extends AnyFlatSpec {
 
   "Map of ProducedItem" should "append correctly" in {
 

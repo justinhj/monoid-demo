@@ -1,9 +1,9 @@
 package org.justinhj
 
 import cats._
-import cats.data._
+//import cats.data._
 import cats.implicits._
-import cats.kernel.instances.all
+//import cats.kernel.instances.all
 import alleycats.std.map._
 
 import production._
