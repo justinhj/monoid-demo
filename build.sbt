@@ -43,11 +43,9 @@ javacOptions ++= Seq("-Xlint:unchecked", "-Xlint:deprecation", "-source", "1.7",
 
 val CatsVersion = "2.0.0-M1"
 val CatsEffectVersion = "1.3.0"
-val MonixVersion = "3.0.0-M3"
 val ScalaZVersion = "7.3.0-M29"
 val ZIOVersion = "1.0-RC4"
 val ShapelessVersion = "2.3.3"
-val FS2Version = "1.0.4"
 
 libraryDependencies ++= Seq(
   "com.typesafe" % "config" % "1.3.1",
@@ -64,10 +62,6 @@ libraryDependencies ++= Seq(
   //"org.typelevel" %% "cats-laws" % CatsVersion,
   "org.typelevel" %% "cats-testkit" % CatsVersion,
   "org.typelevel" %% "cats-effect" % CatsEffectVersion,
-  // fs2
-  "co.fs2" %% "fs2-core" % FS2Version,
-  // monix
-  "io.monix" %% "monix" % MonixVersion,
   // shapeless
   "com.chuusai" %% "shapeless" % ShapelessVersion,
   // scalaz

@@ -1,7 +1,8 @@
 package org.justinhj.production.productionscalaz
 
 import scalaz.{Monoid, Equal, Show, Cord}
-
+import scalaz.syntax.show._
+import scalaz.std.anyVal.{longInstance, doubleInstance}
 import org.justinhj.production.Clock
 
 // Represents an item that may be produced over time
@@ -34,7 +35,7 @@ object ProducedItem {
 
     implicit val showProducedItem = new Show[ProducedItem] {
         def show(p: ProducedItem): Cord = 
-          Cord(s"ProducedItem: Snapshot amount ${p.snapshotAmount} at ${p.snapshotTime}, increasing ${p.amountPerHour} per hour")
+          Cord(z"ProducedItem: Snapshot amount ${p.snapshotAmount} at ${p.snapshotTime}, increasing ${p.amountPerHour} per hour")
       }
 
     implicit def monoidProducedItemOps(implicit clock : Clock) = new Monoid[ProducedItem] {

@@ -1,20 +1,24 @@
 package org.justinhj.production
 
-import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.PropSpec
+import org.scalatest.flatspec.AnyFlatSpec
 import scalaz.std.map._
 import scalaz.syntax.semigroup._
 import org.scalacheck.ScalacheckShapeless._
 import productionscalaz.ProducedItem
 import productionscalaz.ProducedItem._
 import scalaz.scalacheck.ScalazProperties._
-import org.scalacheck.Test
 
 class MonoidLawsScalaz extends PropSpec {
   implicit val clock = FixedClock(System.currentTimeMillis + Clock.oneHourMillis)
-  val oneWorker = Test.Parameters.default.withMinSuccessfulTests(5000)
 
-  monoid.laws[ProducedItem].check(oneWorker) 
+  monoid.laws[ProducedItem].check()
+
+  for {
+    prop <- monoid.laws[ProducedItem].properties
+  } yield {
+    property(prop._1){prop._2}
+  }
 }
 
 class ProducedItemTestScalaz extends AnyFlatSpec {
