@@ -1,9 +1,7 @@
 package org.justinhj
 
 import cats._
-//import cats.data._
 import cats.implicits._
-//import cats.kernel.instances.all
 import alleycats.std.map._
 
 import production._
@@ -38,6 +36,10 @@ object MonoidDemo {
     val listOfInventories = Foldable[List].fold(List(inventory1, inventory2, inventory3))
     println(show"List of inventories $listOfInventories")
 
+    // Folding a single inventory gives us the total amount of things we have right now
+    // Note that because we must turn the keys of the map into some order and that order may not be defined,
+    // this function is not pure. That's why the instance for folding a map is in alley cats, a library that 
+    // allows unlawful operations.
     val foldMapofInts = Foldable[({type MapA[A] = Map[Int, A]})#MapA].fold(Map(1 -> 200, 3 -> 5, 5 -> 100))  
     println(show"Fold map of ints $foldMapofInts")
   }
