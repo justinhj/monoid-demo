@@ -1,24 +1,25 @@
 package org.justinhj
 
-import scalaz.Foldable
-import scalaz.Monoid
-import scalaz.std.list._
-import scalaz.syntax.semigroup._
+import scalaz._
+import Scalaz._
 
-// Note that we are selective about imports here, or Scalaz will define an Int monoid and will use that instead...
 object MaxMonoid {
     def main(args: Array[String]): Unit = {
-        implicit val maxIntMonoid : Monoid[Int] = Monoid.instance[Int]({case (a : Int,b :  Int) => Math.max(a,b)} , Int.MinValue)
+      // Note we use the name intInstance deliberately to override the 
+      // implicit in Scalaz
+      implicit val intInstance : Monoid[Int] = Monoid.instance[Int]({case (a : Int,b :  Int) => Math.max(a,b)} , Int.MinValue)
 
-        val testAppend =  10 |+| 20
-        println(testAppend)
+      // Append is now Max
+      val testAppend =  10 |+| 20
+      println(testAppend) // 20
 
-        val testLeftIdentity = maxIntMonoid.zero |+| 10
-        val testRightIdentity = 10 |+| maxIntMonoid.zero
-        println(testLeftIdentity == testRightIdentity)
+      // Show that left identity and right identity hold
+      val testLeftIdentity = intInstance.zero |+| 10
+      val testRightIdentity = 10 |+| intInstance.zero
+      println(testLeftIdentity == testRightIdentity)
 
-        val ilist = List[Int](1,2,3,4,5,4,3,2,1,-10,1,2,3,4)
-        val folded = Foldable[List].fold(ilist)
-        println(folded)
-      }
+      val ilist = IList[Int](1,2,3,4,5,4,3,2,1,-10,1,2,3,4)
+      val folded = Foldable[IList].fold(ilist)
+      println(folded) // Print the maximum value in the list (5)
+    }
 }
