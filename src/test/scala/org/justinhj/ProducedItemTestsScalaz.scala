@@ -28,7 +28,7 @@ class ProducedItemTestScalaz extends AnyFlatSpec {
     // Sample with test clock
     implicit val clock = FixedClock(System.currentTimeMillis + Clock.oneHourMillis)
     //implicit val clock = SystemClock
-    implicit val now = clock.currentTimeMillis
+    val now = clock.currentTimeMillis
 
     // Handle a map of them
     val inventory1 = Map(

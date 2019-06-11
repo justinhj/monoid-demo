@@ -16,7 +16,7 @@ object ProducedItem {
 
     // This simple Eq function compares the case class fields together which will cause left and right identity to fail
     // I've left this here so you can uncomment it, comment out eqProducedItem, and watch the law fails
-    // implicit val eqProducedItem : Eq[ProducedItem] = Eq.fromUniversalEquals
+    //implicit val eqProducedItem : Eq[ProducedItem] = Eq.fromUniversalEquals
 
     implicit def eqProducedItem(implicit clock : Clock) = new Eq[ProducedItem] {
         def eqv(x: ProducedItem, y: ProducedItem): Boolean = {
