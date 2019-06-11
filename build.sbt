@@ -5,12 +5,12 @@ lazy val monoiddemo = (project in file(".")).
     name := "monoid-demo",
     organization := "org.justinhj",
     version := "0.1-SNAPSHOT",
-    scalaVersion := "2.12.8"
+    scalaVersion := "2.13.0"
     // add other settings here
   )
 
 /* scala versions and options */
-scalaVersion := "2.12.8"
+scalaVersion := "2.13.0"
 
 addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.0")
 addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.6")
@@ -41,10 +41,8 @@ javacOptions ++= Seq("-Xlint:unchecked", "-Xlint:deprecation", "-source", "1.7",
 //   "-J-XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M"
 // )
 
-val CatsVersion = "2.0.0-M1"
+val CatsVersion = "2.0.0-M4"
 val CatsEffectVersion = "1.3.0"
-val ScalaZVersion = "7.3.0-M29"
-val ZIOVersion = "1.0-RC4"
 val ShapelessVersion = "2.3.3"
 
 libraryDependencies ++= Seq(
@@ -64,11 +62,6 @@ libraryDependencies ++= Seq(
   "org.typelevel" %% "cats-effect" % CatsEffectVersion,
   // shapeless
   "com.chuusai" %% "shapeless" % ShapelessVersion,
-  // scalaz
-  "org.scalaz" %% "scalaz-core" % ScalaZVersion,
-  "org.scalaz" %% "scalaz-scalacheck-binding" % ScalaZVersion,
-  // ZIO
-  "org.scalaz" %% "scalaz-zio" % ZIOVersion,
   // type classes
   "com.github.mpilquist" %% "simulacrum" % "0.12.0",
   // li haoyi ammonite repl embed
