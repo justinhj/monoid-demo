@@ -7,7 +7,7 @@ import alleycats.std.map._
 import production._
 import production.productioncats._
 
-object MonoidDemo {
+object ProducedItemMonoidCats {
 
   def main(args: Array[String]) : Unit = {
 
