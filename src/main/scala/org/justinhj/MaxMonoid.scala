@@ -5,7 +5,7 @@ import Scalaz._
 
 object MaxMonoid {
     def main(args: Array[String]): Unit = {
-      // Note we use the name intInstance deliberately to override the 
+      // Note we use the name intInstance deliberately to override the
       // implicit in Scalaz
       implicit val intInstance : Monoid[Int] = Monoid.instance[Int]({case (a : Int,b :  Int) => Math.max(a,b)} , Int.MinValue)
 

@@ -2,7 +2,7 @@ package org.justinhj
 
 import java.time.Instant
 
-trait PersistentEntity[T <: PersistentEntity[T]] {
+trait PersistentEntity[F[_], T <: PersistentEntity[F, T]] {
     type Command
     type Event
     type State
@@ -24,13 +24,16 @@ case class PurchaseEvt(time: Instant, amount: Int) extends BankAccountEvent
 
 case class AccountState(balance: Int)
 
-case class AccountEntity(id: Int, state: AccountState)
-    extends PersistentEntity[AccountEntity] {
+case class AccountEntity[F[_]](id: Int, state: AccountState)
+    extends PersistentEntity[F, AccountEntity[F]] {
 
     override type Command = BankAccountCommand
     override type Event = BankAccountEvent
     override type State = AccountState
 
+    // Processing commands involves validating it can be done with the current
+    // state, and if it can it returns a list of events
+    // It also returns a response, which is defined in the Command
     def processCommand(command: Command) : List[Event] = {
         // TODO persist, TODO error
         command match {
@@ -45,7 +48,7 @@ case class AccountEntity(id: Int, state: AccountState)
         }
     }
 
-    def processEvent(event: Event) : AccountEntity = {
+    def processEvent(event: Event) : AccountEntity[F] = {
         event match {
             case DepositEvt(time, amount) =>
                 AccountEntity(id, AccountState(state.balance + amount))
@@ -69,6 +72,8 @@ case class AccountEntity(id: Int, state: AccountState)
 // purchase 120 (succeed)      80
 
 object Sample {
+    val a = List(1,2,3)
+
     val t1 = Instant.now
     val commands = List(
         DepositCmd(t1.plusSeconds(10), 100),
