@@ -7,7 +7,6 @@ import cats.instances.map._
 import org.scalacheck.ScalacheckShapeless._
 import cats.tests.CatsSuite
 import cats.kernel.laws.discipline.MonoidTests
-
 import productioncats.ProducedItem
 import productioncats.ProducedItem._
 
@@ -41,8 +40,8 @@ class ProducedItemTestCats extends AnyFlatSpec {
     val addInventories = inventory1 |+| inventory2 |+| inventory3
 
     val expected = Map(
-      1 -> ProducedItem(15,now,10.0), 
-      2 -> ProducedItem(10,now,5.0), 
+      1 -> ProducedItem(15,now,10.0),
+      2 -> ProducedItem(10,now,5.0),
       3 -> ProducedItem(2,now,0.0))
 
     assert(expected === addInventories)
