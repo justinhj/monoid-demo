@@ -2,8 +2,9 @@ package org.justinhj
 
 import java.time.Instant
 
+import cats._
 import cats.implicits._
-import cats.{Monoid, Id}
+import cats.{Monoid,Eq,Show}
 
 trait PersistentEntity[F[_], T <: PersistentEntity[F, T]] {
     type Command
@@ -27,7 +28,44 @@ case class DepositEvt(time: Instant, amount: Int) extends BankAccountEvent
 case class PurchaseEvt(time: Instant, amount: Int) extends BankAccountEvent
 case class AssignAccountHolderEvt(time: Instant, accountHolder: String) extends BankAccountEvent
 
-case class AccountState(balance: Int, accountHolder: Option[String])
+object LastOptionHelper {
+    object LastOption {
+        implicit def lastOptionMonoid[A]: Monoid[LastOption[A]] = new Monoid[LastOption[A]] {
+            def combine(a1: LastOption[A], a2: LastOption[A]): LastOption[A] =
+                LastOption(a2.opt.orElse(a1.opt))
+
+            def empty: LastOption[A] = LastOption(None)
+        }
+        implicit def lastOptionEq[A]: Eq[LastOption[A]] = new Eq[LastOption[A]] {
+            def eqv(a1: LastOption[A], a2: LastOption[A]): Boolean =
+            a1.opt == a2.opt
+        }
+        implicit def lastOptiowShow[A : Show]: Show[LastOption[A]] = new Show[LastOption[A]] {
+            def show(a: LastOption[A]): String =
+                a.opt match {
+                    case Some(a) =>
+                        a.show
+                    case None =>
+                        "None"
+                }
+        }
+    }
+
+    implicit final class LastOption[A](val opt: Option[A]) extends AnyVal
+}
+
+import LastOptionHelper._
+
+case class AccountState(balance: Int, accountHolder: LastOption[String])
+
+object AccountState {
+
+    implicit def accountStateShow[A] = new Show[AccountState] {
+        def show(a: AccountState): String = {
+            show"Balance: ${a.balance}\nAccount holder: ${a.accountHolder}"
+        }
+    }
+}
 
 case class AccountEntity[F[_]](id: Int, state: AccountState)
     extends PersistentEntity[F, AccountEntity[F]] {
@@ -83,6 +121,7 @@ object Sample {
 
     def main(args: Array[String]): Unit = {
         val t1 = Instant.now
+
         val commands = List(
             DepositCmd(t1.plusSeconds(10), 100),
             PurchaseCmd(t1.plusSeconds(20), 120),
@@ -91,9 +130,9 @@ object Sample {
             AssignAccountHolderCmd(t1.plusSeconds(50), "Ben Johnson"),
             PurchaseCmd(t1.plusSeconds(60), 120))
 
-        // with processCommand and processEvent
+        // With processCommand and processEvent (PE)
         val finalState = commands.foldLeft(AccountEntity(1, AccountState(0, None))) {
-                case (acc, cmd) =>
+            case (acc, cmd) =>
                 val events = acc.processCommand(cmd)
                 events.foldLeft(acc){
                     case (acc, evt) =>
@@ -101,7 +140,7 @@ object Sample {
                 }
             }
 
-        println(s"Final state $finalState")
+        println(show"Final state ${finalState.state}\n")
 
         // With Monoids. We need a way to convert events to states
         def eventToState(event: BankAccountEvent): AccountState = {
@@ -116,23 +155,42 @@ object Sample {
         }
 
         // Create a persistent entity
-        val tt = Instant.now
+        //val tt = Instant.now
 
         val pe = AccountEntity(1, AccountState(0, None))
 
-        // Apply a command yielding some events
-        val events = pe.processCommand(AssignAccountHolderCmd(tt, "Nero Johnson"))
+        // // Apply commands yielding some events
+        // val events = pe.processCommand(AssignAccountHolderCmd(tt, "Nero Johnson"))
 
-        // Convert those events to states
-        val states = events.map(eventToState)
+        // // Convert those events to states
+        // val states = events.map(eventToState)
 
         // Combine those states to get the current state
 
-        val accountMonoid : Monoid[AccountEntity[Id]] = {
-
+        implicit val accountMonoid = new Monoid[AccountState] {
+            def empty : AccountState = AccountState(0, None)
+            def combine(p1: AccountState, p2: AccountState) : AccountState = {
+                AccountState(p1.balance |+| p2.balance, p1.accountHolder |+| p2.accountHolder)
+            }
         }
 
-        //println(s"Final state $finalState2")
+        val events = commands.foldLeft(((AccountEntity(2, AccountState(0, None))), List.empty[BankAccountEvent])) {
+            case ((acc, events), cmd) =>
+                val newEvents = acc.processCommand(cmd)
+                val newAcc = events.foldLeft(acc) {
+                    case (acc,evt) =>
+                        acc.processEvent(evt)
+                }
+                (newAcc, events ++ newEvents)
+            }
+
+        val allEvents = events._2
+
+        println(s"$allEvents")
+
+        val finalState2 = allEvents.map(eventToState).combineAll
+
+        println(show"Final state $finalState2")
     }
 }
 
@@ -142,6 +200,5 @@ object Sample {
 //   Commands which change state should emit a list of events following writing the events to a db
 //   Once persisted the events should playback, changing the state
 
-// Question, can
 
 
