@@ -122,6 +122,9 @@ object Sample {
     def main(args: Array[String]): Unit = {
         val t1 = Instant.now
 
+        // Create a sample account entity
+        val sampleAccount = AccountEntity(1, AccountState(0, None))
+
         val commands = List(
             DepositCmd(t1.plusSeconds(10), 100),
             PurchaseCmd(t1.plusSeconds(20), 120),
@@ -131,7 +134,7 @@ object Sample {
             PurchaseCmd(t1.plusSeconds(60), 120))
 
         // With processCommand and processEvent (PE)
-        val finalState = commands.foldLeft(AccountEntity(1, AccountState(0, None))) {
+        val finalState = commands.foldLeft(sampleAccount) {
             case (acc, cmd) =>
                 val events = acc.processCommand(cmd)
                 events.foldLeft(acc){
@@ -154,11 +157,6 @@ object Sample {
             }
         }
 
-        // Create a persistent entity
-        //val tt = Instant.now
-
-        val pe = AccountEntity(1, AccountState(0, None))
-
         // // Apply commands yielding some events
         // val events = pe.processCommand(AssignAccountHolderCmd(tt, "Nero Johnson"))
 
@@ -174,7 +172,7 @@ object Sample {
             }
         }
 
-        val events = commands.foldLeft(((AccountEntity(2, AccountState(0, None))), List.empty[BankAccountEvent])) {
+        val events = commands.foldLeft((sampleAccount, List.empty[BankAccountEvent])) {
             case ((acc, events), cmd) =>
                 val newEvents = acc.processCommand(cmd)
                 val newAcc = events.foldLeft(acc) {
