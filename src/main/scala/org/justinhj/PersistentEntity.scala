@@ -6,7 +6,7 @@ import cats._
 import cats.implicits._
 import cats.{Monoid,Eq,Show}
 
-trait PersistentEntity[F[_], T <: PersistentEntity[F, T]] {
+trait PersistentEntity[T <: PersistentEntity[T]] {
     type Command
     type Event
     type State
@@ -65,10 +65,17 @@ object AccountState {
             show"Balance: ${a.balance}\nAccount holder: ${a.accountHolder}"
         }
     }
+
+    implicit val accountMonoid = new Monoid[AccountState] {
+        def empty : AccountState = AccountState(0, None)
+        def combine(p1: AccountState, p2: AccountState) : AccountState = {
+            AccountState(p1.balance |+| p2.balance, p1.accountHolder |+| p2.accountHolder)
+        }
+    }
 }
 
-case class AccountEntity[F[_]](id: Int, state: AccountState)
-    extends PersistentEntity[F, AccountEntity[F]] {
+case class AccountEntity(id: Int, state: AccountState)
+    extends PersistentEntity[AccountEntity] {
 
     override type Command = BankAccountCommand
     override type Event = BankAccountEvent
@@ -92,7 +99,7 @@ case class AccountEntity[F[_]](id: Int, state: AccountState)
         }
     }
 
-    def processEvent(event: Event) : AccountEntity[F] = {
+    def processEvent(event: Event) : AccountEntity = {
         event match {
             case DepositEvt(time, amount) =>
                 AccountEntity(id, AccountState(state.balance + amount, state.accountHolder))
@@ -164,13 +171,6 @@ object Sample {
         // val states = events.map(eventToState)
 
         // Combine those states to get the current state
-
-        implicit val accountMonoid = new Monoid[AccountState] {
-            def empty : AccountState = AccountState(0, None)
-            def combine(p1: AccountState, p2: AccountState) : AccountState = {
-                AccountState(p1.balance |+| p2.balance, p1.accountHolder |+| p2.accountHolder)
-            }
-        }
 
         val events = commands.foldLeft((sampleAccount, List.empty[BankAccountEvent])) {
             case ((acc, events), cmd) =>
