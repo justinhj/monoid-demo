@@ -1,10 +1,39 @@
 package org.justinhj
 
+package org.justinhj
+
 import java.time.Instant
 
 import cats._
 import cats.implicits._
 import cats.{Monoid,Eq,Show}
+import zio._
+import zio.Runtime
+import zio.clock.Clock
+import zio.console._
+import zio.internal.{Platform, PlatformLive}
+import zio.blocking.Blocking
+import zio.random.Random
+import zio.system.System
+
+// trait HttpClient {
+//     val httpClient : HttpClient.Service[HttpClient with Blocking]
+// }
+
+// object httpclient extends HttpClient.Service[HttpClient with Blocking] {
+//   final def get(url: String): ZIO[Any with HttpClient with Blocking, Throwable, String] =
+//   ZIO.accessM(_.httpClient.get(url))
+// }
+
+
+// Define a runtime for production
+trait LiveRuntime extends Runtime[Clock with Console with System with Random with Blocking] {
+  type Environment = Clock with Console with System with Random with Blocking
+
+  val Platform: Platform       = PlatformLive.Default
+  val Environment: Environment = new Clock.Live with Console.Live with System.Live with Random.Live with Blocking.Live
+}
+
 
 trait PersistentEntity[T <: PersistentEntity[T]] {
     type Command
@@ -183,5 +212,38 @@ object Sample {
         val finalState2 = allEvents.map(eventToState).combineAll
 
         println(show"Final state $finalState2")
+
+        // zio part
+
+        val runtime = new DefaultRuntime{}
+
+        val program = for (
+            _ <- putStrLn("Hello")
+            ) yield ()
+
+        runtime.unsafeRun(program)
+
+        // Zio version goals
+        // 1. Queue we can send commands to
+        // 2. Commands applied and generate events
+        // 3. Persist using a zio module, see below for interface
+        // 4. Update state
+        // 5. At any time can look at the state (in a ref)
+        // 6. When starting the program the queue should load events from the store using the persist module
+
+        trait EventRepository[EventType] {
+            val eventRepository : EventRepository.Service[EventType, EventRepository[EventType]]
+        }
+
+        object EventRepository {
+            trait Service[EventType, R <: EventRepository[EventType]] {
+                // Note this should be a stream
+                // Also make an error type
+                def readAllEvents(): ZIO[R, Throwable, List[EventType]]
+                def writeEvent(event: EventType): Task[Unit]
+                def writeEvents(events: List[EventType]): Task[Unit]
+            }
+        }
+
     }
 }
