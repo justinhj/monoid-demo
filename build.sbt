@@ -71,6 +71,9 @@ libraryDependencies ++= Seq(
   // ZIO
   "dev.zio" %% "zio" % ZIOVersion,
   "dev.zio" %% "zio-streams" % ZIOVersion,
+  // Monix
+  "io.monix" %% "monix" % "3.1.0",
+  "dev.zio" %% "zio-interop-monix" % "3.1.0.0-RC1",
   // type classes
   "com.github.mpilquist" %% "simulacrum" % "0.12.0",
   // li haoyi ammonite repl embed

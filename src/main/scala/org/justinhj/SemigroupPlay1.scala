@@ -8,12 +8,34 @@ object SemigroupPlay {
     // import cats.data.NonEmptyListInstances
     // import cats.data.NonEmptyList._
 
+    import cats._
+    import cats.syntax._
+    import cats.implicits._
+
     //val catList = NonEmptyList.of(1,2,3).combine(NonEmptyList.of(4,5,6))
+
+    val fa = 10.some
+    val fb = 20.some
+    val fc = 30.some
+
+    val plus1 = Some((a: Int) => a + 1)
+
+    val test = Apply[Option].ap(plus1)(fa)
+
+    // Product for option
+    def product[A, B](fa: Option[A], fb: Option[B]): Option[(A, B)] = {
+      (fa, fb) match {
+        case (Some(a), Some(b)) => Some((a,b))
+        case _ => None
+      }
+    }
 
     def main(args : Array[String]) {
         import scala.util.Random
         import scala.io.StdIn
         import scala.util.{Try,Success,Failure}
+
+        println(test)
 
         // Ask the user for a number and keep asking until you get one.
         def inputNumber(prompt: String) : Int = {
