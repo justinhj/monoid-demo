@@ -19,16 +19,22 @@ trait PersistentEntity[T <: PersistentEntity[T]] {
 }
 
 sealed trait BankAccountCommand
-case class DepositCmd(time: Instant, amount: Int) extends BankAccountCommand
-case class PurchaseCmd(time: Instant, amount: Int) extends BankAccountCommand
-case class AssignAccountHolderCmd(time: Instant, accountHolder: String) extends BankAccountCommand
+final case class DepositCmd(time: Instant, amount: Int) extends BankAccountCommand
+final case class PurchaseCmd(time: Instant, amount: Int) extends BankAccountCommand
+final case class AssignAccountHolderCmd(time: Instant, accountHolder: String) extends BankAccountCommand
 
 sealed trait BankAccountEvent
-case class DepositEvt(time: Instant, amount: Int) extends BankAccountEvent
-case class PurchaseEvt(time: Instant, amount: Int) extends BankAccountEvent
-case class AssignAccountHolderEvt(time: Instant, accountHolder: String) extends BankAccountEvent
+final case class DepositEvt(time: Instant, amount: Int) extends BankAccountEvent
+final case class PurchaseEvt(time: Instant, amount: Int) extends BankAccountEvent
+final case class AssignAccountHolderEvt(time: Instant, accountHolder: String) extends BankAccountEvent
 
 object LastOptionHelper {
+
+    @SuppressWarnings(Array("org.wartremover.warts.Equals"))
+    implicit final class AnyOps[A](self: A) {
+      def ===(other: A): Boolean = self == other
+    }
+
     object LastOption {
         implicit def lastOptionMonoid[A]: Monoid[LastOption[A]] = new Monoid[LastOption[A]] {
             def combine(a1: LastOption[A], a2: LastOption[A]): LastOption[A] =
@@ -38,7 +44,7 @@ object LastOptionHelper {
         }
         implicit def lastOptionEq[A]: Eq[LastOption[A]] = new Eq[LastOption[A]] {
             def eqv(a1: LastOption[A], a2: LastOption[A]): Boolean =
-            a1.opt == a2.opt
+            a1.opt === a2.opt
         }
         implicit def lastOptiowShow[A : Show]: Show[LastOption[A]] = new Show[LastOption[A]] {
             def show(a: LastOption[A]): String =
@@ -56,7 +62,7 @@ object LastOptionHelper {
 
 import LastOptionHelper._
 
-case class AccountState(balance: Int, accountHolder: LastOption[String])
+final case class AccountState(balance: Int, accountHolder: LastOption[String])
 
 object AccountState {
 
@@ -74,7 +80,7 @@ object AccountState {
     }
 }
 
-case class AccountEntity(id: Int, state: AccountState)
+final case class AccountEntity(id: Int, state: AccountState)
     extends PersistentEntity[AccountEntity] {
 
     override type Command = BankAccountCommand
@@ -93,7 +99,7 @@ case class AccountEntity(id: Int, state: AccountState)
                 if(amount <= state.balance)
                     List(PurchaseEvt(time, amount))
                 else
-                    List.empty
+                    List.empty[Event]
             case AssignAccountHolderCmd(time, accountHolder) =>
                 List(AssignAccountHolderEvt(time, accountHolder))
         }
@@ -132,7 +138,7 @@ object Sample {
         // Create a sample account entity
         val sampleAccount = AccountEntity(1, AccountState(0, None))
 
-        val commands = List(
+        val commands = List[BankAccountCommand](
             DepositCmd(t1.plusSeconds(10), 100),
             PurchaseCmd(t1.plusSeconds(20), 120),
             AssignAccountHolderCmd(t1.plusSeconds(40), "Bob Johnson"),
@@ -180,7 +186,7 @@ object Sample {
 
         println(s"$allEvents")
 
-        val finalState2 = allEvents.map(eventToState).combineAll
+        val finalState2: AccountState = allEvents.map(eventToState).combineAll
 
         println(show"Final state $finalState2")
     }

@@ -2,13 +2,18 @@ package org.justinhj
 
 object FreePlay {
 
+    @SuppressWarnings(Array("org.wartremover.warts.Equals"))
+    implicit final class AnyOps[A](self: A) {
+      def ===(other: A): Boolean = self == other
+    }
+
     import cats.free.Free
     import cats.free.Free.liftF
 
     sealed trait KVStoreA[A]
-    case class Put[T](key: String, value: T) extends KVStoreA[Unit]
-    case class Get[T](key: String) extends KVStoreA[Option[T]]
-    case class Delete(key: String) extends KVStoreA[Unit]
+    final case class Put[T](key: String, value: T) extends KVStoreA[Unit]
+    final case class Get[T](key: String) extends KVStoreA[Option[T]]
+    final case class Delete(key: String) extends KVStoreA[Unit]
 
     type KVStore[A] = Free[KVStoreA, A]
 

@@ -9,9 +9,9 @@ object Contra {
     val animal: Animal = new Zebra
 
     class Hotel[-T]
-    def generic = new Hotel[Any]
+    def generic = new Hotel[Int]
     // thanks to contravariance
-    val ah: Hotel[Int] = generic
+    //val ah: Hotel[Boolean] = generic
 
 
 

@@ -44,8 +44,9 @@ javacOptions ++= Seq("-Xlint:unchecked", "-Xlint:deprecation", "-source", "1.7",
 val CatsVersion = "2.0.0-M1"
 val CatsEffectVersion = "1.3.0"
 val ScalaZVersion = "7.3.0-M29"
-val ZIOVersion = "1.0.0-RC17"
+val ZIOVersion = "1.0.0-RC18"
 val ShapelessVersion = "2.3.3"
+val SttpVersion = "2.0.7"
 
 libraryDependencies ++= Seq(
   "com.typesafe" % "config" % "1.3.1",
@@ -68,26 +69,35 @@ libraryDependencies ++= Seq(
   // scalaz
   "org.scalaz" %% "scalaz-core" % ScalaZVersion,
   "org.scalaz" %% "scalaz-scalacheck-binding" % ScalaZVersion,
+  // Monix
+  "io.monix" %% "monix" % "3.1.0",
   // ZIO
   "dev.zio" %% "zio" % ZIOVersion,
   "dev.zio" %% "zio-streams" % ZIOVersion,
-  // Monix
-  "io.monix" %% "monix" % "3.1.0",
   "dev.zio" %% "zio-interop-monix" % "3.1.0.0-RC1",
+  "dev.zio" %% "zio-interop-cats" % "2.0.0.0-RC9",
+  "dev.zio" %% "zio-config" % "1.0.0-RC15-1",
+  "dev.zio" %% "zio-config-typesafe" % "1.0.0-RC15-1",
+  // Sttp
+  "com.softwaremill.sttp.client" %% "core" % SttpVersion,
+  "com.softwaremill.sttp.client" %% "async-http-client-backend-zio" % SttpVersion,
+  "com.softwaremill.sttp.client" %% "json4s" % SttpVersion,
+  "org.json4s" %% "json4s-native" % "3.6.0",
+  "com.softwaremill.sttp.client" %% "slf4j-backend" % SttpVersion,
+  // 47 Degs
+  "com.47deg" %% "github4s" % "0.22.0",
   // type classes
   "com.github.mpilquist" %% "simulacrum" % "0.12.0",
-  // li haoyi ammonite repl embed
+  // Li HaoYi stack
+  "com.lihaoyi" %% "upickle" % "0.9.5",
   "com.lihaoyi" % "ammonite" % "2.0.3" % "test" cross CrossVersion.full
-
 )
+
+//wartremoverWarnings ++= Warts.unsafe
 
 //ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) }
 
-resolvers ++= Seq(
-  "Typesafe Snapshots" at "http://repo.typesafe.com/typesafe/snapshots/",
-  "Secured Central Repository" at "https://repo1.maven.org/maven2",
-  Resolver.sonatypeRepo("snapshots")
-)
+resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 
 // scalariform
 //scalariformSettings

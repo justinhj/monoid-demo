@@ -5,11 +5,9 @@ import zio.clock.Clock
 import zio.console._
 import zio.random.Random
 import zio.system.System
-import zio.internal.PlatformLive
-import zio.DefaultRuntime
 import zio._
-import monix.eval
 import zio.interop.monix._
+import zio.internal.Platform
 
 /*
 I was wondering what the best way to convert from a ZIO[R,Throwable,A] to a Monix eval.Task is?
@@ -26,10 +24,7 @@ object ZioAmmonite {
   import monix.execution.Scheduler.Implicits.global
 
   // A runtime instance
-  implicit val rts: Runtime[Env] = new DefaultRuntime {
-    override val platform =
-      PlatformLive.makeDefault().withReportFailure(_ => ())
-  }
+  implicit val rts: Runtime[Env] = Runtime.default
 
   def z1(n: Int) : ZIO[Env, Throwable, Int] = {
     for (

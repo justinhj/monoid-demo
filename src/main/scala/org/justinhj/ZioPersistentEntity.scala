@@ -11,7 +11,7 @@ import zio._
 import zio.Runtime
 import zio.clock.Clock
 import zio.console._
-import zio.internal.{Platform, PlatformLive}
+import zio.internal.Platform
 import zio.blocking.Blocking
 import zio.random.Random
 import zio.system.System
@@ -30,10 +30,9 @@ import zio.system.System
 trait LiveRuntime extends Runtime[Clock with Console with System with Random with Blocking] {
   type Environment = Clock with Console with System with Random with Blocking
 
-  val Platform: Platform       = PlatformLive.Default
-  val Environment: Environment = new Clock.Live with Console.Live with System.Live with Random.Live with Blocking.Live
+  val Platform: Platform       = Platform
+ // val Environment: Environment = new Clock.live with Console with System.Live with Random.Live with Blocking.Live
 }
-
 
 trait PersistentEntity[T <: PersistentEntity[T]] {
     type Command
@@ -48,14 +47,14 @@ trait PersistentEntity[T <: PersistentEntity[T]] {
 }
 
 sealed trait BankAccountCommand
-case class DepositCmd(time: Instant, amount: Int) extends BankAccountCommand
-case class PurchaseCmd(time: Instant, amount: Int) extends BankAccountCommand
-case class AssignAccountHolderCmd(time: Instant, accountHolder: String) extends BankAccountCommand
+final case class DepositCmd(time: Instant, amount: Int) extends BankAccountCommand
+final case class PurchaseCmd(time: Instant, amount: Int) extends BankAccountCommand
+final case class AssignAccountHolderCmd(time: Instant, accountHolder: String) extends BankAccountCommand
 
 sealed trait BankAccountEvent
-case class DepositEvt(time: Instant, amount: Int) extends BankAccountEvent
-case class PurchaseEvt(time: Instant, amount: Int) extends BankAccountEvent
-case class AssignAccountHolderEvt(time: Instant, accountHolder: String) extends BankAccountEvent
+final case class DepositEvt(time: Instant, amount: Int) extends BankAccountEvent
+final case class PurchaseEvt(time: Instant, amount: Int) extends BankAccountEvent
+final case class AssignAccountHolderEvt(time: Instant, accountHolder: String) extends BankAccountEvent
 
 object LastOptionHelper {
     object LastOption {
@@ -65,6 +64,8 @@ object LastOptionHelper {
 
             def empty: LastOption[A] = LastOption(None)
         }
+
+        @SuppressWarnings(Array("org.wartremover.warts.Equals"))
         implicit def lastOptionEq[A]: Eq[LastOption[A]] = new Eq[LastOption[A]] {
             def eqv(a1: LastOption[A], a2: LastOption[A]): Boolean =
             a1.opt == a2.opt
@@ -85,7 +86,7 @@ object LastOptionHelper {
 
 import LastOptionHelper._
 
-case class AccountState(balance: Int, accountHolder: LastOption[String])
+final case class AccountState(balance: Int, accountHolder: LastOption[String])
 
 object AccountState {
 
@@ -103,7 +104,7 @@ object AccountState {
     }
 }
 
-case class AccountEntity(id: Int, state: AccountState)
+final case class AccountEntity(id: Int, state: AccountState)
     extends PersistentEntity[AccountEntity] {
 
     override type Command = BankAccountCommand
@@ -122,7 +123,7 @@ case class AccountEntity(id: Int, state: AccountState)
                 if(amount <= state.balance)
                     List(PurchaseEvt(time, amount))
                 else
-                    List.empty
+                    List.empty[Event]
             case AssignAccountHolderCmd(time, accountHolder) =>
                 List(AssignAccountHolderEvt(time, accountHolder))
         }
@@ -161,7 +162,7 @@ object Sample {
         // Create a sample account entity
         val sampleAccount = AccountEntity(1, AccountState(0, None))
 
-        val commands = List(
+        val commands = List[BankAccountCommand](
             DepositCmd(t1.plusSeconds(10), 100),
             PurchaseCmd(t1.plusSeconds(20), 120),
             AssignAccountHolderCmd(t1.plusSeconds(40), "Bob Johnson"),
@@ -215,9 +216,9 @@ object Sample {
 
         // zio part
 
-        val runtime = new DefaultRuntime{}
+        val runtime = Runtime.default
 
-        val program = for (
+        val program: ZIO[Console, Nothing, Unit] = for (
             _ <- putStrLn("Hello")
             ) yield ()
 

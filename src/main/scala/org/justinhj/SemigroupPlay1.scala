@@ -9,7 +9,6 @@ object SemigroupPlay {
     // import cats.data.NonEmptyList._
 
     import cats._
-    import cats.syntax._
     import cats.implicits._
 
     //val catList = NonEmptyList.of(1,2,3).combine(NonEmptyList.of(4,5,6))

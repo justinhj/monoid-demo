@@ -2,6 +2,11 @@ package org.justinhj
 
 object WhatsAp {
 
+  @SuppressWarnings(Array("org.wartremover.warts.Equals"))
+  implicit final class AnyOps[A](self: A) {
+    def ===(other: A): Boolean = self == other
+  }
+
   // This is exercise 12.1 from the Red Book
   // and the second part of 12.2
 
@@ -76,7 +81,7 @@ object WhatsAp {
     println(s"o1 + o2 = $o3")
 
     val t1 = applicativeOption.traverse(List(2,4,6))(n =>
-      if(n%2 == 1) None
+      if(n%2 === 1) None
       else Some(n))
     println(t1)
 

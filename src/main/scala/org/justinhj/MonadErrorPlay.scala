@@ -4,6 +4,8 @@ import cats.effect._
 import scala.util.Try
 import scala.io.StdIn
 
+// How does MonadError work?
+
 object MonadErrorPlay {
 
     def stringToInt(str: String): Try[Double] = {
