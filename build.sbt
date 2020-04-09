@@ -76,8 +76,8 @@ libraryDependencies ++= Seq(
   "dev.zio" %% "zio-streams" % ZIOVersion,
   "dev.zio" %% "zio-interop-monix" % "3.1.0.0-RC1",
   "dev.zio" %% "zio-interop-cats" % "2.0.0.0-RC9",
-  "dev.zio" %% "zio-config" % "1.0.0-RC15-1",
-  "dev.zio" %% "zio-config-typesafe" % "1.0.0-RC15-1",
+  "dev.zio" %% "zio-config" % "1.0.0-RC16",
+  "dev.zio" %% "zio-config-typesafe" % "1.0.0-RC16",
   // Sttp
   "com.softwaremill.sttp.client" %% "core" % SttpVersion,
   "com.softwaremill.sttp.client" %% "async-http-client-backend-zio" % SttpVersion,
