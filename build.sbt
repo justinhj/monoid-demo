@@ -84,6 +84,9 @@ libraryDependencies ++= Seq(
   "com.softwaremill.sttp.client" %% "json4s" % SttpVersion,
   "org.json4s" %% "json4s-native" % "3.6.0",
   "com.softwaremill.sttp.client" %% "slf4j-backend" % SttpVersion,
+  // Cassandra
+  "io.getquill" %% "quill-cassandra" % "3.5.1",
+  "com.datastax.oss" % "java-driver-core" % "4.3.0",
   // 47 Degs
   "com.47deg" %% "github4s" % "0.22.0",
   // type classes

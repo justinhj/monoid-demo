@@ -14,9 +14,10 @@ import zio.config.Config
 import zio.config.config
 import sttp.model.Uri
 import scala.util.Try
+import zio.duration._
 
 /**
-  * Uses ZIO, Cats and github4s
+  * Uses ZIO, ZIO config, json4s, Sttp
   * Grabs gists and PRs everything else is pretty much the same
   */
 
@@ -28,31 +29,108 @@ object ZioLagomDemo {
 
   type ServicesResponse = List[Service]
 
-  // Example:
-  //   [{
-  //   "name": "lagomraidboss-readside",
-  //   "url": "http://127.0.0.1:63859",
-  //   "portName": null
-  // },...]
-
   case class Service(
     name: String,
     url: String,
     portName: String
   )
 
-  case class AppConfig(servicesUrl: String, raidbossServiceName: String)
-  // Zio config
+  type GroupIdsResponse = List[String]
+
+  case class RaidBossInstanceMessage(
+    bossDefId: String,
+    health: Long,
+    instanceId: String,
+    leaderboard: List[List[Any]],
+    created: Long,
+    updated: Long,
+    groupId: String
+  )
+
+  type GroupBossesSinceTimeResponse = List[RaidBossInstanceMessage]
+
+  // Services URL is the service locator
+
+  case class LagomService(servicesUrl: String, raidbossServiceName: String)
+  case class AppConfig(lagomService: LagomService)
+
+  // Zio config descriptor
   val appConfigDescriptor = descriptor[AppConfig]
 
+  case class LeaderboardEntry(name: String, score: Long)
+
+  // Get raid bosses created by guild since a time
+  // curl http://127.0.0.1:63859/raidbossapi/raidboss/list/YW1/1 | jq
+  // Array of this
+
+  val sample = """[
+    {
+    "bossDefId": "Btype1",
+    "health": 790,
+    "instanceId": "raidbossinstance-YW1-Btype1-1578282493317",
+    "leaderboard": [
+      [
+        "chris",
+        30
+      ],
+      [
+        "jamie",
+        60
+      ],
+      [
+        "justin",
+        70
+      ],
+      [
+        "neil",
+        50
+      ]
+    ],
+    "created": 1578282493877,
+    "updated": 1578282511083,
+    "groupId": "YW1"
+  }
+  ]"""
+
   def main(args: Array[String]): Unit = {
+
+    // class LeaderboardSerializer extends CustomSerializer[List[(String, Int)]](format => (
+    //      {
+    //        case JObject(JField("leaderboard", JInt(s)) :: JField("end", JInt(e)) :: Nil) =>
+    //          new Interval(s.longValue, e.longValue)
+    //      },
+    //      {
+    //        case x: Interval =>
+    //          JObject(JField("start", JInt(BigInt(x.startTime))) ::
+    //                  JField("end",   JInt(BigInt(x.endTime))) :: Nil)
+    //      }
+    //    ))
+
+    // implicit val formats = _root_.org.json4s.DefaultFormats
+    // val parsed = parse(sample).extract[List[RaidBossInstanceMessage]]
+
+    // println(parsed)
+    // System.exit(10)
 
     val typesafeConfig = ConfigFactory.load()
     val configLayer = TypesafeConfig.fromTypesafeConfig(typesafeConfig, appConfigDescriptor)
 
-    def getServicesRequest(uri: Uri) = basicRequest
+    // Requests
+
+    // Get services from Lagom
+    def getLagomServicesRequest(uri: Uri) = basicRequest
       .get(uri)
       .response(asJson[ServicesResponse])
+
+    // Get all groups
+    def getAllGroupIds(uri: Uri) = basicRequest
+      .get(uri)
+      .response(asJson[GroupIdsResponse])
+
+    // Get bosses for group with UTC millisecond timestamp
+    def bossesForGroupSinceTime(uri: Uri) = basicRequest
+      .get(uri)
+      .response(asJson[GroupBossesSinceTimeResponse])
 
     def findService(name: String, services: Seq[Service]): Either[String, Service] = {
       services.find(svc => svc.name == name) match {
@@ -64,8 +142,8 @@ object ZioLagomDemo {
     val getServices: ZIO[Console with SttpClient with Config[AppConfig], Throwable, ServicesResponse] = {
       for (
         config <- config[AppConfig];
-        uri <- ZIO.fromTry(Try(uri"${config.servicesUrl}"));
-        response <- SttpClient.send(getServicesRequest(uri));
+        uri <- ZIO.fromTry(Try(uri"${config.lagomService.servicesUrl}"));
+        response <- SttpClient.send(getLagomServicesRequest(uri));
         result <- response.body match {
           case Left(err) => ZIO.fail(err)
           case Right(response) => ZIO.succeed(response)
@@ -73,14 +151,62 @@ object ZioLagomDemo {
       ) yield result
     }
 
+    // Get all the group IDs in the system
+    def getGroupIds(endpoint: String) = {
+      for (
+        uri <- ZIO.fromTry(Try(uri"$endpoint/raidbossapi/groupids/list"));
+        response <- SttpClient.send(getAllGroupIds(uri));
+        result <- response.body match {
+          case Left(err) => ZIO.fail(err)
+          case Right(response) => ZIO.succeed(response)
+        }
+      ) yield result
+    }
+
+    // For the group ID and timestamp in ms (UTC) will return the list of bosses created since that time
+    // Requires the endpoint for the service
+    def getBossesForGroupSinceTime(groupId: String, since: Long, endpoint: String)
+      : ZIO[Console with SttpClient, Throwable, GroupBossesSinceTimeResponse] = {
+      for (
+        uri <- ZIO.fromTry(Try(uri"$endpoint/raidbossapi/raidboss/list/$groupId/$since"));
+        response <- SttpClient.send(bossesForGroupSinceTime(uri));
+        result <- response.body match {
+          case Left(err) => ZIO.fail(err)
+          case Right(response) => ZIO.succeed(response)
+        }
+      ) yield result
+    }
+
+    def displayActiveBosses(groupIds: List[String], since: Long, endpoint: String) = {
+      ZIO.foreach(groupIds) {
+        groupId =>
+          getBossesForGroupSinceTime(groupId, since, endpoint).flatMap {
+            rbis =>
+              ZIO.foreach(rbis) { rbi =>
+                putStrLn(s"Boss instance: ${rbi.instanceId} health ${rbi.health}")
+              }
+          }
+      }
+    }
+
+    def monitorActiveBosses(endpoint: String) = for (
+      _ <- putStrLn("Updating active bosses");
+      groupIds <- getGroupIds(endpoint);
+      _ <- displayActiveBosses(groupIds, 1578282493777L, endpoint)
+    ) yield ()
+
+    // Given the service address (e.g: http://127.0.0.1:63859) we will call raidbossapi/groupids/list
+    // to get all the known groups. The service receives this from the read side Cassandra DB
+
     val program = (for(
       config <- config[AppConfig];
-      serviceName = config.raidbossServiceName;
+      serviceName = config.lagomService.raidbossServiceName;
       _ <- putStrLn(s"Finding $serviceName...");
       services <- getServices;
       service <- ZIO.fromEither(findService(serviceName, services));
-      _ <- putStrLn(s"Found service: ${service.name} at ${service.url}")
-      ) yield (service))
+      _ <- putStrLn(s"Found service: ${service.name} at ${service.url}");
+      _ <- monitorActiveBosses(service.url).repeat(Schedule.spaced(10.seconds))
+    ) yield ())
         .provideCustomLayer(configLayer ++ AsyncHttpClientZioBackend.layer())
 
     val handleErrors = program.foldM(
