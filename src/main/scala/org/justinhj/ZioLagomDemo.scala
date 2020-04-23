@@ -17,8 +17,8 @@ import scala.util.Try
 import zio.duration._
 
 /**
-  * Uses ZIO, ZIO config, json4s, Sttp
-  * Grabs gists and PRs everything else is pretty much the same
+  * Uses ZIO, ZIO config, json4s, Sttp to interrogate a Lagom service registry
+  * so it can extract information over the API
   */
 
 object ZioLagomDemo {
@@ -94,23 +94,12 @@ object ZioLagomDemo {
 
   def main(args: Array[String]): Unit = {
 
-    // class LeaderboardSerializer extends CustomSerializer[List[(String, Int)]](format => (
-    //      {
-    //        case JObject(JField("leaderboard", JInt(s)) :: JField("end", JInt(e)) :: Nil) =>
-    //          new Interval(s.longValue, e.longValue)
-    //      },
-    //      {
-    //        case x: Interval =>
-    //          JObject(JField("start", JInt(BigInt(x.startTime))) ::
-    //                  JField("end",   JInt(BigInt(x.endTime))) :: Nil)
-    //      }
-    //    ))
-
-    // implicit val formats = _root_.org.json4s.DefaultFormats
-    // val parsed = parse(sample).extract[List[RaidBossInstanceMessage]]
-
-    // println(parsed)
-    // System.exit(10)
+    val defaultStartTime = 1578371052607L
+    val startTime =
+      if(args.size > 0)
+        Try(args(0).toLong).getOrElse(defaultStartTime)
+      else
+        defaultStartTime
 
     val typesafeConfig = ConfigFactory.load()
     val configLayer = TypesafeConfig.fromTypesafeConfig(typesafeConfig, appConfigDescriptor)
@@ -192,7 +181,7 @@ object ZioLagomDemo {
     def monitorActiveBosses(endpoint: String) = for (
       _ <- putStrLn("Updating active bosses");
       groupIds <- getGroupIds(endpoint);
-      _ <- displayActiveBosses(groupIds, 1578282493777L, endpoint)
+      _ <- displayActiveBosses(groupIds, startTime, endpoint)
     ) yield ()
 
     // Given the service address (e.g: http://127.0.0.1:63859) we will call raidbossapi/groupids/list
