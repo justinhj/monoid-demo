@@ -79,7 +79,7 @@ libraryDependencies ++= Seq(
 //ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) }
 
 resolvers ++= Seq(
-  "Typesafe Snapshots" at "http://repo.typesafe.com/typesafe/snapshots/",
+  "Typesafe Snapshots" at "https://repo.typesafe.com/typesafe/snapshots/",
   "Secured Central Repository" at "https://repo1.maven.org/maven2",
   Resolver.sonatypeRepo("snapshots")
 )
