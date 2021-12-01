@@ -78,6 +78,14 @@ object IncreaseCountMonoidExample {
     val step2Folded2 = Foldable[IList].fold(step2InputList2)
     println(s"Step 2. Count is ${step2Folded2.count}")
 
+    // With traverse
+    //val traverseInput = IList.fromList(List(1,2,3))
+    val nonEmptyTraverseInput = NonEmptyList(1,2,3)
+    val traversed1 = Traverse[NonEmptyList].traverse(nonEmptyTraverseInput) {
+      n =>
+        Const[IncreaseCount,Any](IncreaseCount(0,n,n))
+    }
+    println(traversed1)
 
   }
 }
